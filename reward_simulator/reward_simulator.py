@@ -27,6 +27,8 @@ personas = [
 
 
 def simulate_reward(env, action):
+  """Simulates the reaction of the person in the environment to an action"""
+
   persona = sorted(personas, key=lambda persona: persona.distance_to_environment(env))[0]
   reward = persona.calculate_reward(env, action)
   print(str.format("{} rewards {} with {} in {}", persona.name, action, reward, env))

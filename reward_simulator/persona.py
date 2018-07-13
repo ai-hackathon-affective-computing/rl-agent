@@ -3,6 +3,7 @@ import math
 
 
 class Persona:
+  """Wrapper class for a persona"""
 
   def __init__(self, name, female, age, has_sunglasses, traits):
     self.name = name
