@@ -1,7 +1,8 @@
 from johannes_agent import JohannesAgent
 from reward_simulator.reward_simulator import simulate_reward
-
+from copy import deepcopy
 import random
+import numpy as np
 
 feature_def = {
     'female': {'min': 0, 'max': 1},
@@ -37,7 +38,7 @@ def random_features_generator(force_dict, seed=None):
 
 
 def update_features(features, step, is_music):
-    features['step'] = step
+    features['step'] = step+1
     features['music_on'] = int(is_music)
     return features
 
@@ -51,13 +52,13 @@ def explore(agent, n_episodes):
         last_features = None
         reward = 0
         is_music = False
-        features = random_features_generator({'music_on': int(is_music)})
+        features = random_features_generator({'music_on': int(is_music), 'step': 0})
 
         ### STEP ###
         for step in range(n_steps):
             action = agent.act(features=features.values())
             reward = simulate_reward(features,  action_def[action])
-            last_features = features
+            last_features = deepcopy( features )
             features = update_features(features, step, is_music)
 
             agent.remember((last_features.values(), action, reward, features.values(), (step == n_steps-1)))
@@ -73,13 +74,14 @@ def train(agent, n_episodes):
     reward_per_episodes = []
 
     for repetition in range(n_episodes):
-        agent.set_epsilon(1.0 - (repetition/n_episodes))
+        #agent.set_epsilon(1.0 - (repetition/n_episodes))
+        agent.set_epsilon(np.exp(-repetition/(n_episodes/3.)))
 
         ### RESET ###
         last_features = None
         reward = 0
         is_music = False
-        features = random_features_generator({'music_on': int(is_music)})
+        features = random_features_generator({'music_on': int(is_music), 'step': 0})
         reward_per_steps = []
 
         ### STEP ###
@@ -95,7 +97,7 @@ def train(agent, n_episodes):
             if 'music' in action_def[action]:
                 is_music = True
 
-        #agent.learn()
+        agent.learn()
         reward_per_episodes.append(reward_per_steps)
         print('Episode {} reached summed reward of {}'.format(repetition, sum(reward_per_steps)))
 
@@ -110,7 +112,7 @@ def evaluate(agent, n_episodes):
 
         ### RESET ###
         is_music = False
-        features = random_features_generator({'music_on': int(is_music)})
+        features = random_features_generator({'music_on': int(is_music), "step":0})
         reward_per_steps = []
 
         ### STEP ###
