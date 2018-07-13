@@ -1,14 +1,14 @@
-FROM tiangolo/uwsgi-nginx-flask:flask
+FROM tiangolo/uwsgi-nginx-flask:python3.6
 
 # Copy requirements to tmp
 COPY requirements.txt /tmp/
 
 # Upgrade pip and install required python packages
-RUN pip install -U pip
-RUN pip install -r /tmp/requirements.txt
+RUN pip3 install -U pip
+RUN pip3 install -r /tmp/requirements.txt
 
 # Copy over our app code
 COPY ./app /app
 
 # TODO: Train network
-# RUN python
+# RUN python3
