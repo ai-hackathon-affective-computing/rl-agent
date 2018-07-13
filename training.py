@@ -42,6 +42,7 @@ def update_features(features, step, is_music):
 
 
 def explore(agent, n_episodes):
+    agent.set_epsilon(1.0)
 
     for repetition in range(n_episodes):
 
@@ -70,7 +71,9 @@ def explore(agent, n_episodes):
 
 def train(agent, n_episodes):
     reward_per_episodes = []
+
     for repetition in range(n_episodes):
+        agent.set_epsilon(1.0 - (repetition/n_episodes))
 
         ### RESET ###
         last_features = None
@@ -101,6 +104,8 @@ def train(agent, n_episodes):
 
 def evaluate(agent, n_episodes):
     reward_per_episodes = []
+    agent.set_epsilon(0.0)
+
     for repetition in range(n_episodes):
 
         ### RESET ###
