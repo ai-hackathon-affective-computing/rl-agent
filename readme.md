@@ -1,7 +1,9 @@
 # Read Me
 
+http://ec2-54-194-217-192.eu-west-1.compute.amazonaws.com/observe?gender=0&age=25&music_on=1&has_sunglasses=0
 
-## Run Server
+
+## Deploy Server
 
 docker build -t rl-agent .
 
