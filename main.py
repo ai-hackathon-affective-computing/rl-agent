@@ -19,7 +19,7 @@ def get_env_from_params(params):
 def hello():
   return "Hello world!"
 
-@app.route('/action')
+@app.route('/next_action')
 def next_action():
   env = get_env_from_params(request.args)
   return jsonify({
