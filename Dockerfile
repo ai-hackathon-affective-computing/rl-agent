@@ -4,11 +4,11 @@ FROM tiangolo/uwsgi-nginx-flask:flask
 COPY requirements.txt /tmp/
 
 # Upgrade pip and install required python packages
-RUN pip3 install -U pip3
-RUN pip3 install -r /tmp/requirements.txt
+RUN pip install -U pip
+RUN pip install -r /tmp/requirements.txt
 
 # Copy over our app code
 COPY ./app /app
 
 # TODO: Train network
-# RUN python3
+# RUN python
