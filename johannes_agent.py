@@ -27,7 +27,7 @@ class JohannesAgent(object):
         if np.random.rand() <= self.epsilon:
             return rn.randint(0, self.n_actions - 1)
         else:
-            act_values = self.target_model.predict(features)
+            act_values = self.target_model.predict(self.reshape_state(features))
             return np.argmax(act_values[0])
 
     def learn(self):
@@ -37,14 +37,14 @@ class JohannesAgent(object):
             if batch is None:
                 return
             for state, action, reward, next_state, done in batch:
-                target = self.target_model.predict(state)
+                target = self.target_model.predict(self.reshape_state(state))
                 if done:
                     target[0][action] = reward
                 else:
-                    a = self.value_model.predict(next_state)[0]
-                    t = self.target_model.predict(next_state)[0]
+                    a = self.value_model.predict(self.reshape_state(next_state))[0]
+                    t = self.target_model.predict(self.reshape_state(next_state))[0]
                     target[0][action] = reward + self.hyperparameters["GAMMA"] * t[np.argmax(a)]
-                self.value_model.fit(state, target, epochs=1, verbose=0)
+                self.value_model.fit(self.reshape_state(state), target, epochs=1, verbose=0)
                 if self.epsilon > self.hyperparameters["EPSILON_MIN"]:
                     self.epsilon = max(self.hyperparameters["EPSILON_MIN"], self.epsilon * self.hyperparameters["EPSILON_DECAY"])
                 self.counter += 1
@@ -53,9 +53,9 @@ class JohannesAgent(object):
 
     def build_network(self, n_features, n_actions):
         model = Sequential([
-            Dense(32, input_shape=n_features),
+            Dense(16, input_shape=n_features),
             Activation("relu"),
-            Dense(64),
+            Dense(32),
             Activation("relu"),
             Dense(n_actions),
             Activation("linear")
@@ -93,6 +93,10 @@ class JohannesAgent(object):
 
     def save(self):
         self.target_model.save('net_savings/net-' + str(datetime.datetime.now().time()) + '-.h5')
+
+
+    def reshape_state(self, features):
+        return np.array(features)
 
 
     def read_in_configuration_file(self):
