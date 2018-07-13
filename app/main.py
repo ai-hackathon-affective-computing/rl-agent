@@ -15,6 +15,10 @@ def get_env_from_params(params):
     'has_sunglasses': params.get('has_sunglasses', type=int)
   }
 
+@app.route('/')
+def hello():
+  return "Hello world!"
+
 @app.route('/observe')
 def obvserve():
   env = get_env_from_params(request.args)
@@ -25,4 +29,4 @@ def reset():
   return "OK"
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', debug=True)
