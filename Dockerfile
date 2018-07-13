@@ -4,7 +4,7 @@ FROM tiangolo/uwsgi-nginx-flask:flask
 COPY requirements.txt /tmp/
 
 # Upgrade pip and install required python packages
-RUN pip3 install -U pip
+RUN pip3 install -U pip3
 RUN pip3 install -r /tmp/requirements.txt
 
 # Copy over our app code
