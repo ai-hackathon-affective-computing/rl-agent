@@ -3,7 +3,6 @@ from flask import Flask, request, abort, jsonify
 
 server = Flask(__name__)
 
-
 def get_env_from_params(params):
   if params.get('gender') is None: abort(400, "gender missing")
   if params.get('age') is None: abort(400, "age missing")
@@ -16,7 +15,6 @@ def get_env_from_params(params):
     'has_sunglasses': params.get('has_sunglasses', type=int)
   }
 
-
 @server.route('/observe')
 def obvserve():
   env = get_env_from_params(request.args)
@@ -25,3 +23,6 @@ def obvserve():
 @server.route('/reset')
 def reset():
   return "OK"
+
+if __name__ == "__main__":
+    server.run(host='0.0.0.0')
