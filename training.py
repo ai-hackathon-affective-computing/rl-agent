@@ -1,21 +1,25 @@
 from johannes_agent import JohannesAgent
 from reward_simulator.reward_simulator import simulate_reward
-
+from copy import deepcopy
 import random
 
 feature_def = {
     'female': {'min': 0, 'max': 1},
     'age': {'min': 18, 'max': 99},
     'has_sunglasses': {'min': 0, 'max': 1},
-    'music_on': {'min': 0, 'max': 1},
-    'step': {'min': 0, 'max': 1},               # This can be exchanged with time later
+    'music': {'min': 0, 'max': 3},
+    'step': {'min': 0, 'max': 4},
+    'route': {'min': 0, 'max': 3}
+    # This can be exchanged with time later
 }
 
 action_def = {
-    0: 'music_A',
-    1: 'music_B',
-    2: 'route_A',
-    3: 'route_B'
+    0: 'no_music',
+    1: 'music_A',
+    2: 'music_B',
+    3: 'no_route',
+    4: 'route_A',
+    5: 'route_B'
 }
 
 n_steps = 5             # 0, 1 (15min), 2 (30min), 3 (45min), 4 (END)
@@ -36,9 +40,14 @@ def random_features_generator(force_dict, seed=None):
     return env
 
 
-def update_features(features, step, is_music):
-    features['step'] = step
-    features['music_on'] = int(is_music)
+def update_features(features, action):
+    features['step'] = features['step'] + 1
+    if (action >= 0 and action < 3):
+        features['music'] = action
+
+    if (action >= 3 and action < 6):
+        features['route'] = action - 3
+
     return features
 
 
@@ -48,25 +57,29 @@ def explore(agent, n_episodes):
     for repetition in range(n_episodes):
 
         ### RESET ###
-        last_features = None
-        reward = 0
-        is_music = False
-        features = random_features_generator({'music_on': int(is_music)})
+        music = 0
+        route = 0
+        step = 0
+        features = random_features_generator({'music': music, 'route': route, 'step': step})
 
         ### STEP ###
         for step in range(n_steps):
             action = agent.act(features=features.values())
             reward = simulate_reward(features,  action_def[action])
-            last_features = features
-            features = update_features(features, step, is_music)
 
-            agent.remember((last_features.values(), action, reward, features.values(), (step == n_steps-1)))
+            ### TODO fix update_features
+            next_features = update_features(features, action)
 
-            if 'music' in action_def[action]:
-                is_music = True
+            agent.remember((features.values(), action, reward, next_features.values(), (step == n_steps-1)))
+
+            features = deepcopy(next_features)
+
+
+
 
         agent.learn()
         print('Episode {}'. format(repetition))
+        reward = 0
 
 
 def train(agent, n_episodes):
@@ -76,10 +89,10 @@ def train(agent, n_episodes):
         agent.set_epsilon(1.0 - (repetition/n_episodes))
 
         ### RESET ###
-        last_features = None
-        reward = 0
-        is_music = False
-        features = random_features_generator({'music_on': int(is_music)})
+        music = 0
+        route = 0
+        step = 0
+        features = random_features_generator({'music': music, 'route': route, 'step': step})
         reward_per_steps = []
 
         ### STEP ###
@@ -87,13 +100,12 @@ def train(agent, n_episodes):
             action = agent.act(features=features.values())
             reward = simulate_reward(features,  action_def[action])
             last_features = features
-            features = update_features(features, step, is_music)
+            features = update_features(features, action)
 
             agent.remember((last_features.values(), action, reward, features.values(), (step == n_steps-1)))
             reward_per_steps.append(reward)
 
-            if 'music' in action_def[action]:
-                is_music = True
+
 
         #agent.learn()
         reward_per_episodes.append(reward_per_steps)
@@ -109,20 +121,19 @@ def evaluate(agent, n_episodes):
     for repetition in range(n_episodes):
 
         ### RESET ###
-        is_music = False
-        features = random_features_generator({'music_on': int(is_music)})
+        music = 0
+        route = 0
+        step = 0
+        features = random_features_generator({'music': music, 'route': route, 'step': step})
         reward_per_steps = []
 
         ### STEP ###
         for step in range(n_steps):
             action = agent.act(features=features.values())
             reward = simulate_reward(features, action_def[action])
-            features = update_features(features, step, is_music)
+            features = update_features(features, action)
 
             reward_per_steps.append(reward)
-
-            if 'music' in action_def[action]:
-                is_music = True
 
         reward_per_episodes.append(reward_per_steps)
         print('Episode {} reached summed reward of {}'. format(repetition, sum(reward_per_steps)))
