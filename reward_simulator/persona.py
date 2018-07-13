@@ -34,11 +34,11 @@ class Persona:
 
   def simplified(self, name):
     if name == 'Hanna':
-      return {0: 0, 1: 2, 2: 3, 3: 2}
+      return {0: 0, 1: 2, 2: 3, 3: 2, 4:0}
     elif name == 'Verena':
-      return {0: 1, 1: 3, 2: 2, 3: 3}
+      return {0: 1, 1: 3, 2: 2, 3: 3, 4:0}
     elif name == 'Gerd':
-      return {0: 2, 1: 3, 2: 2, 3: 3}
+      return {0: 2, 1: 3, 2: 2, 3: 3, 4:0}
     else:
-      return {0: 1, 1: 2, 2: 3, 3: 2}
+      return {0: 1, 1: 2, 2: 3, 3: 2, 4:0}
 
