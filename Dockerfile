@@ -1,14 +1,13 @@
 FROM tiangolo/uwsgi-nginx-flask:python3.6
 
-# Copy requirements to tmp
-#COPY requirements.txt /tmp/
+# Install keras
+RUN pip3 install numpy
+RUN pip3 install pandas
+RUN pip3 install keras
+RUN pip3 install tensorforce
 
-# Upgrade pip and install required python packages
-#RUN pip3 install -U pip
-#RUN pip3 install -r /tmp/requirements.txt
-
-# Copy over our app code
-COPY ./app /app
+# Copy our code to app
+COPY ./ /app
 
 # TODO: Train network
-# RUN python3
+# RUN python3 app/training.py

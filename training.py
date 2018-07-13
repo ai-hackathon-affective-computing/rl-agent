@@ -2,6 +2,7 @@ from johannes_agent import JohannesAgent
 from reward_simulator.reward_simulator import simulate_reward
 from copy import deepcopy
 import random
+import numpy as np
 
 feature_def = {
     'female': {'min': 0, 'max': 1},
@@ -79,7 +80,6 @@ def explore(agent, n_episodes):
 
         agent.learn()
         print('Episode {}'. format(repetition))
-        reward = 0
 
 
 def train(agent, n_episodes):
@@ -107,7 +107,7 @@ def train(agent, n_episodes):
 
 
 
-        #agent.learn()
+        agent.learn()
         reward_per_episodes.append(reward_per_steps)
         print('Episode {} reached summed reward of {}'.format(repetition, sum(reward_per_steps)))
 
