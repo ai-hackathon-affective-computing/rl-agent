@@ -41,7 +41,8 @@ def random_features_generator(force_dict, seed=None):
     return env
 
 
-def update_features(features, action):
+def update_features(features1, action):
+    features = deepcopy(features1)
     features['step'] = features['step'] + 1
     if (action >= 0 and action < 3):
         features['music'] = action
