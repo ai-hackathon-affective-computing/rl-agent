@@ -22,7 +22,10 @@ def hello():
 @app.route('/observe')
 def obvserve():
   env = get_env_from_params(request.args)
-  return jsonify(env)
+  return jsonify({
+    'action': 'MUSIC_A',
+    'env': env
+  })
 
 @app.route('/reset')
 def reset():
