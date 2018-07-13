@@ -1,10 +1,10 @@
 from johannes_agent import JohannesAgent
-from reward_simulator import simulate_reward
+from reward_simulator.reward_simulator import simulate_reward
 
 import random
 
 feature_def = {
-    'gender': {'min': 0, 'max': 1},
+    'female': {'min': 0, 'max': 1},
     'age': {'min': 18, 'max': 99},
     'has_sunglasses': {'min': 0, 'max': 1},
     'music_on': {'min': 0, 'max': 1},
@@ -29,7 +29,7 @@ def random_features_generator(force_dict, seed=None):
 
     for key in feature_def.keys():
         if key in force_dict.keys():
-            env['key'] = force_dict[key]
+            env[key] = force_dict[key]
         else:
             env[key] = random.randint(feature_def[key]['min'], feature_def[key]['max'])
     return env
@@ -57,7 +57,7 @@ def explore(agent, n_episodes):
             action = agent.act(features=features.values())
             last_features = features
             features = update_features(features, step, is_music)
-            reward = simulate_reward(features, action)
+            reward = simulate_reward(features, action_def[action])
 
             agent.remember((last_features.values(), action, reward, features.values(), (step == n_steps-1)))
 
@@ -84,7 +84,7 @@ def train(agent, n_episodes):
             action = agent.act(features=features.values())
             last_features = features
             features = update_features(features, step, is_music)
-            reward = simulate_reward(features, action)
+            reward = simulate_reward(features, action_def[action])
 
             agent.remember((last_features.values(), action, reward, features.values(), (step == n_steps - 1)))
             reward_per_steps.append(reward)
@@ -113,7 +113,7 @@ def evaluate(agent, n_episodes):
             action = agent.act(features=features.values())
             last_features = features
             features = update_features(features, step, is_music)
-            reward = simulate_reward(features, action)
+            reward = simulate_reward(features, action_def[action])
 
             agent.remember((last_features.values(), action, reward, features.values(), (step == n_steps-1)))
             reward_per_steps.append(reward)
