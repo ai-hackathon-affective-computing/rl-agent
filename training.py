@@ -46,6 +46,7 @@ if __name__ == '__main__':
     n_steps = 5             # 0, 1 (15min), 2 (30min), 3 (45min), 4 (END)
 
     agent = JohannesAgent(n_features=len(feature_def), n_actions=4)
+    reward_per_episodes = []
 
     for repetition in range(n_repetitions):
 
@@ -54,6 +55,7 @@ if __name__ == '__main__':
         reward = 0
         is_music = False
         features = random_features_generator({'music_on': int(is_music)})
+        reward_per_steps = []
 
         ### STEP ###
         for step in range(n_steps):
@@ -63,10 +65,13 @@ if __name__ == '__main__':
             reward = simulate_reward(features, action)
 
             agent.remember((last_features.values(), action, reward, features.values(), (step == n_steps-1)))
+            reward_per_steps.append(reward)
 
             if 'music' in action_def[action]:
                 is_music = True
 
         agent.learn()
+        reward_per_episodes.append(reward_per_steps)
+        print('Episode {} reached summed reward of {}'. format(repetition, sum(reward_per_steps)))
 
     agent.save()
