@@ -1,7 +1,7 @@
 from __future__ import print_function
 from flask import Flask, request, abort, jsonify
 
-server = Flask(__name__)
+app = Flask(__name__)
 
 def get_env_from_params(params):
   if params.get('gender') is None: abort(400, "gender missing")
@@ -15,14 +15,14 @@ def get_env_from_params(params):
     'has_sunglasses': params.get('has_sunglasses', type=int)
   }
 
-@server.route('/observe')
+@app.route('/observe')
 def obvserve():
   env = get_env_from_params(request.args)
   return jsonify(env)
 
-@server.route('/reset')
+@app.route('/reset')
 def reset():
   return "OK"
 
 if __name__ == "__main__":
-    server.run(host='0.0.0.0')
+    app.run(host='0.0.0.0')
