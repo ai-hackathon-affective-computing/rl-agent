@@ -3,7 +3,8 @@ from __future__ import print_function
 
 def needs_music(persona, env, action):
   """The persona is unhappy if there is no music"""
-  return -0.5 if (env['music_on'] == 0) else 0
+  is_music_on = (env['music_on'] == 1) or 'music' in action
+  return 0 if is_music_on else -0.5
 
 def prefers_genre(genre):
   """The persona prefers a specific genre"""
