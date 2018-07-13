@@ -19,8 +19,8 @@ def get_env_from_params(params):
 def hello():
   return "Hello world!"
 
-@app.route('/observe')
-def obvserve():
+@app.route('/action')
+def next_action():
   env = get_env_from_params(request.args)
   return jsonify({
     'action': 'MUSIC_A',
