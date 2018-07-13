@@ -38,10 +38,5 @@ def observe():
     should_reward = False
   return "OK"
 
-@app.route('/reset')
-def reset():
-  step = 0
-  return "OK"
-
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
