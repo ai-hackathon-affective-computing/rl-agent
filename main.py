@@ -2,8 +2,7 @@ from __future__ import print_function
 from flask import Flask, request, abort, jsonify
 
 app = Flask(__name__)
-step = 0
-should_reward_last_action = False
+should_reward = False
 
 @app.route('/')
 def hello():
@@ -11,8 +10,7 @@ def hello():
 
 @app.route('/next_action')
 def next_action():
-  if (step >= 4):
-    abort(400, "End of simulation, please call /reset")
+  if params.get('step') is None: abort(400, "step missing")
   if params.get('gender') is None: abort(400, "gender missing")
   if params.get('age') is None: abort(400, "age missing")
   if params.get('music_on') is None: abort(400, "music_on missing")
@@ -22,23 +20,22 @@ def next_action():
     'age': params.get('gender', type=int),
     'music_on': params.get('gender', type=int),
     'has_sunglasses': params.get('has_sunglasses', type=int),
-    'step': step
+    'step': params.get('step', type=int)
   }
   action = 'MUSIC_A' # TODO: Get action
-  should_reward_last_action = True
-  step = += 1
+  should_reward = True
   return jsonify({
     'action': action,
     'env': env
   })
 
 @app.route('/observe')
-def reward():
+def observe():
   if params.get('happiness') is None: abort(400, "happiness missing")
   happiness = params.get('happiness', type=float)
-  if not should_reward_last_action:
+  if should_reward:
     # TODO: Reward
-    should_reward_last_action = true
+    should_reward = False
   return "OK"
 
 @app.route('/reset')
