@@ -22,8 +22,23 @@ class Persona:
       +    1    * float(abs(env['has_sunglasses'] - self.has_sunglasses))
 
   def calculate_reward(self, env, action):
-    reward = reduce(lambda result, trait: result + trait(self, env, action), self.traits, 0.5)
-    return min(max(reward, 0), 1)
+    # reward = reduce(lambda result, trait: result + trait(self, env, action), self.traits, 0.5)
+    if action == self.simplified(self.name)[env['step']]:
+      return 1
+    else:
+      return 0
+    # return min(max(reward, 0), 1)
 
   def __str__(self):
     return str.format("Persona {}", self.name)
+
+  def simplified(self, name):
+    if name == 'Hanna':
+      return {0: 0, 1: 2, 2: 3, 3: 2}
+    elif name == 'Verena':
+      return {0: 1, 1: 3, 2: 2, 3: 3}
+    elif name == 'Gerd':
+      return {0: 2, 1: 3, 2: 2, 3: 3}
+    else:
+      return {0: 1, 1: 2, 2: 3, 3: 2}
+
