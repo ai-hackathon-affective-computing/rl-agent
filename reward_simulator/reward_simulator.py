@@ -4,37 +4,25 @@ import traits
 
 
 personas = [
-  Persona(
-    'Hanna',
-    1, 30, 1, [
-      traits.needs_music,
-      traits.prefers_genre('A'),
-      traits.prefers_route('A')
-    ]
-  ),
-  Persona(
-    'Verena',
-    1, 55, 0, [
-      traits.needs_music,
-      traits.prefers_genre('B'),
-      traits.prefers_route('B')
-    ]
-  ),
-  Persona(
-    'Gerd',
-    0, 60, 1, [
-      traits.prefers_genre('B'),
-      traits.prefers_route('A')
-    ]
-  ),
-  Persona(
-    'Fabian',
-    0, 28, 0, [
-      traits.needs_music,
-      traits.prefers_genre('A'),
-      traits.prefers_route('B')
-    ]
-  )
+  Persona('Hanna', 1, 30, 1, [
+    traits.needs_music,
+    traits.prefers_genre('A'),
+    traits.prefers_route('A')
+  ]),
+  Persona('Verena', 1, 55, 0, [
+    traits.needs_music,
+    traits.prefers_genre('B'),
+    traits.prefers_route('B')
+  ]),
+  Persona('Gerd', 0, 60, 1, [
+    traits.prefers_genre('B'),
+    traits.prefers_route('A')
+  ]),
+  Persona('Fabian', 0, 28, 0, [
+    traits.needs_music,
+    traits.prefers_genre('A'),
+    traits.prefers_route('B')
+  ])
 ]
 
 
