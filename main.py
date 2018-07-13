@@ -2,7 +2,7 @@ from __future__ import print_function
 from flask import Flask, request, abort, jsonify
 
 app = Flask(__name__)
-should_reward = False
+choice_to_reward = None
 
 @app.route('/')
 def hello():
@@ -23,7 +23,7 @@ def next_action():
     'step': params.get('step', type=int)
   }
   action = 'MUSIC_A' # TODO: Get action
-  should_reward = True
+  choice_to_reward = (env, action)
   return jsonify({
     'action': action,
     'env': env
@@ -33,9 +33,9 @@ def next_action():
 def observe():
   if params.get('happiness') is None: abort(400, "happiness missing")
   happiness = params.get('happiness', type=float)
-  if should_reward:
+  if choice_to_reward is not None:
     # TODO: Reward
-    should_reward = False
+    choice_to_reward = None
   return "OK"
 
 if __name__ == "__main__":
