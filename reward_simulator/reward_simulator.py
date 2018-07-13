@@ -1,6 +1,6 @@
 from __future__ import print_function
-from persona import Persona
-import traits
+from reward_simulator.persona import Persona
+import reward_simulator.traits as traits
 
 
 personas = [
@@ -32,4 +32,4 @@ def simulate_reward(env, action):
   persona = sorted(personas, key=lambda persona: persona.distance_to_environment(env))[0]
   reward = persona.calculate_reward(env, action)
   print(str.format("{} rewards {} with {} in {}", persona.name, action, reward, env))
-  return 0
+  return reward

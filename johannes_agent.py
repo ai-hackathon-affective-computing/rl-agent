@@ -1,5 +1,5 @@
 from keras.models import *
-from keras.layers.core import Dense, Activation
+from keras.layers.core import Dense, Activation, Dropout
 from random import sample as rsample
 import numpy as np
 import random as rn
@@ -15,7 +15,7 @@ class JohannesAgent(object):
         self.epsilon = self.hyperparameters["EPSILON"]
         self.n_features = n_features
         self.n_actions = n_actions
-        if load_network:
+        if not load_network:
             self.value_model = self.build_network(n_features, n_actions)
             self.target_model = self.build_network(n_features, n_actions)
         else:
@@ -53,14 +53,15 @@ class JohannesAgent(object):
 
     def build_network(self, n_features, n_actions):
         model = Sequential([
-            Dense(16, input_shape=n_features),
+            Dense(10, input_dim=n_features),
             Activation("relu"),
-            Dense(32),
+            Dropout(0.25),
+            Dense(5),
             Activation("relu"),
             Dense(n_actions),
-            Activation("linear")
+            Activation("sigmoid")
         ])
-        model.compile(loss='mean_squared_error', optimizer=optimizers.Adam(lr=self.hyperparameters["LEARNING_RATE"]))
+        model.compile(loss='binary_crossentropy', optimizer=optimizers.Adam())#lr=self.hyperparameters["LEARNING_RATE"]))
         return model
 
 
@@ -92,15 +93,18 @@ class JohannesAgent(object):
         return load_model(file)
 
     def save(self):
-        self.target_model.save('net_savings/net-' + str(datetime.datetime.now().time()) + '-.h5')
+        self.target_model.save('net_savings/net-' + str(datetime.datetime.now().time()).replace(':','.') + '-.h5')
 
 
     def reshape_state(self, features):
-        return np.array(features)
+        return np.reshape(np.array(list(features)), (1,-1))
 
 
     def read_in_configuration_file(self):
         return yaml.load(open('parameters.yml'))
+
+    def set_epsilon(self, epsilon):
+        self.epsilon = epsilon
 
 
 if __name__ == "__main__":

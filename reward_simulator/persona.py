@@ -1,6 +1,10 @@
 from __future__ import print_function
 import math
 
+try:
+  from functools import reduce
+except:
+  pass
 
 class Persona:
   """Wrapper class for a persona"""

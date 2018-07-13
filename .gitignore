@@ -4,3 +4,4 @@ Pipfile.lock
 
 *.iws
 *.pyc
+*.h5
