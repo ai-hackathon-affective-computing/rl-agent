@@ -102,6 +102,9 @@ class JohannesAgent(object):
     def read_in_configuration_file(self):
         return yaml.load(open('parameters.yml'))
 
+    def set_epsilon(self, epsilon):
+        self.epsilon = epsilon
+
 
 if __name__ == "__main__":
     agent = JohannesAgent()
