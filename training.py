@@ -135,7 +135,7 @@ def evaluate(agent, n_episodes):
 
 if __name__ == '__main__':
 
-    agent = JohannesAgent(n_features=len(feature_def), n_actions=4)
+    agent = JohannesAgent(n_features=len(feature_def), n_actions=len(action_def))
 
     # Set epsilon to 1
     explore(agent, 1000)
