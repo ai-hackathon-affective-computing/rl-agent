@@ -20,6 +20,7 @@ action_def = {
 
 n_steps = 5             # 0, 1 (15min), 2 (30min), 3 (45min), 4 (END)
 
+
 def random_features_generator(force_dict, seed=None):
     force_dict = {} if force_dict is None else force_dict
     env = {}
@@ -52,13 +53,12 @@ def explore(agent, n_episodes):
         is_music = False
         features = random_features_generator({'music_on': int(is_music)})
 
-
         ### STEP ###
         for step in range(n_steps):
             action = agent.act(features=features.values())
+            reward = simulate_reward(features,  action_def[action])
             last_features = features
             features = update_features(features, step, is_music)
-            reward = simulate_reward(features, action_def[action])
 
             agent.remember((last_features.values(), action, reward, features.values(), (step == n_steps-1)))
 
@@ -85,17 +85,17 @@ def train(agent, n_episodes):
         ### STEP ###
         for step in range(n_steps):
             action = agent.act(features=features.values())
+            reward = simulate_reward(features,  action_def[action])
             last_features = features
             features = update_features(features, step, is_music)
-            reward = simulate_reward(features, action_def[action])
 
-            agent.remember((last_features.values(), action, reward, features.values(), (step == n_steps - 1)))
+            agent.remember((last_features.values(), action, reward, features.values(), (step == n_steps-1)))
             reward_per_steps.append(reward)
 
             if 'music' in action_def[action]:
                 is_music = True
 
-        agent.learn()
+        #agent.learn()
         reward_per_episodes.append(reward_per_steps)
         print('Episode {} reached summed reward of {}'.format(repetition, sum(reward_per_steps)))
 
@@ -116,17 +116,14 @@ def evaluate(agent, n_episodes):
         ### STEP ###
         for step in range(n_steps):
             action = agent.act(features=features.values())
-            last_features = features
-            features = update_features(features, step, is_music)
             reward = simulate_reward(features, action_def[action])
+            features = update_features(features, step, is_music)
 
-            agent.remember((last_features.values(), action, reward, features.values(), (step == n_steps-1)))
             reward_per_steps.append(reward)
 
             if 'music' in action_def[action]:
                 is_music = True
 
-        agent.learn()
         reward_per_episodes.append(reward_per_steps)
         print('Episode {} reached summed reward of {}'. format(repetition, sum(reward_per_steps)))
 
@@ -145,7 +142,6 @@ if __name__ == '__main__':
 
     # Set epsilon to 1.0 to 0.0
     reward_per_episodes = train(agent, 1000)
-    # ToDo: Visualize training
     agent.save()
 
     series = pd.Series([sum(e) for e in reward_per_episodes])
@@ -154,7 +150,6 @@ if __name__ == '__main__':
 
     # Set epsilon to 0
     reward_per_episodes = evaluate(agent, 100)
-    # ToDo: Visualize evaluation
 
     series = pd.Series([sum(e) for e in reward_per_episodes])
     series.plot()
