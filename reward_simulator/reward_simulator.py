@@ -32,4 +32,4 @@ def simulate_reward(env, action):
   persona = sorted(personas, key=lambda persona: persona.distance_to_environment(env))[0]
   reward = persona.calculate_reward(env, action)
   print(str.format("{} rewards {} with {} in {}", persona.name, action, reward, env))
-  return 0
+  return reward

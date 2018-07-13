@@ -1,5 +1,5 @@
 from keras.models import *
-from keras.layers.core import Dense, Activation
+from keras.layers.core import Dense, Activation, Dropout
 from random import sample as rsample
 import numpy as np
 import random as rn
@@ -53,14 +53,15 @@ class JohannesAgent(object):
 
     def build_network(self, n_features, n_actions):
         model = Sequential([
-            Dense(16, input_dim=n_features),
+            Dense(10, input_dim=n_features),
             Activation("relu"),
-            Dense(32),
+            Dropout(0.25),
+            Dense(5),
             Activation("relu"),
             Dense(n_actions),
-            Activation("linear")
+            Activation("sigmoid")
         ])
-        model.compile(loss='mean_squared_error', optimizer=optimizers.Adam(lr=self.hyperparameters["LEARNING_RATE"]))
+        model.compile(loss='binary_crossentropy', optimizer=optimizers.Adam())#lr=self.hyperparameters["LEARNING_RATE"]))
         return model
 
 

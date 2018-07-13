@@ -132,6 +132,8 @@ def evaluate(agent, n_episodes):
 
     return reward_per_episodes
 
+import pandas as pd
+import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
 
@@ -146,7 +148,16 @@ if __name__ == '__main__':
     # ToDo: Visualize training
     agent.save()
 
+    series = pd.Series([sum(e) for e in reward_per_episodes])
+    series.plot()
+    plt.show()
+
     # Set epsilon to 0
-    reward_per_episodes = evaluate(agent, 10)
+    reward_per_episodes = evaluate(agent, 100)
     # ToDo: Visualize evaluation
+
+    series = pd.Series([sum(e) for e in reward_per_episodes])
+    series.plot()
+    plt.show()
+
 
