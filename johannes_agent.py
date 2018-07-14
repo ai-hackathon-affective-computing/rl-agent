@@ -45,23 +45,23 @@ class JohannesAgent(object):
                     t = self.target_model.predict(self.reshape_state(next_state))[0]
                     target[0][action] = reward + self.hyperparameters["GAMMA"] * t[np.argmax(a)]
                 self.value_model.fit(self.reshape_state(state), target, epochs=1, verbose=0)
-                if self.epsilon > self.hyperparameters["EPSILON_MIN"]:
-                    self.epsilon = max(self.hyperparameters["EPSILON_MIN"], self.epsilon * self.hyperparameters["EPSILON_DECAY"])
                 self.counter += 1
 
 
 
     def build_network(self, n_features, n_actions):
         model = Sequential([
-            Dense(10, input_dim=n_features),
+            Dense(n_features, input_dim=n_features),
             Activation("relu"),
             Dropout(0.25),
-            Dense(5),
+            Dense(n_features),
+            Activation("relu"),
+            Dense(n_features),
             Activation("relu"),
             Dense(n_actions),
             Activation("sigmoid")
         ])
-        model.compile(loss='binary_crossentropy', optimizer=optimizers.Adam())#lr=self.hyperparameters["LEARNING_RATE"]))
+        model.compile(loss='binary_crossentropy', optimizer=optimizers.Adam())
         return model
 
 
@@ -70,19 +70,6 @@ class JohannesAgent(object):
             experiences = rsample(self.experience_buffer, self.hyperparameters["BATCH_SIZE"])
             return experiences
         return None
-
-
-    def fill_experience_buffer(self):
-        for i in range(self.hyperparameters["EXP_BUFFER_SIZE"]):
-            state = self.simulation.reset()
-            while True:
-                action = self.act(state)
-                next_state, reward, done, _ = self.simulation.step(action)
-                self.remember(state, action, reward, next_state, done)
-                state = deepcopy(next_state)
-                if done:
-                    break
-
 
     def remember(self, tuple):
         if len(self.experience_buffer) >= self.hyperparameters["EXP_BUFFER_SIZE"]:
