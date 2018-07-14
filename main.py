@@ -1,7 +1,9 @@
 from __future__ import print_function
 from flask import Flask, request, abort, jsonify
+from agent import agent
 
 app = Flask(__name__)
+agent.load()
 choice_to_reward = None
 
 @app.route('/')
@@ -10,19 +12,21 @@ def hello():
 
 @app.route('/next_action')
 def next_action():
-  if params.get('step') is None: abort(400, "step missing")
   if params.get('gender') is None: abort(400, "gender missing")
   if params.get('age') is None: abort(400, "age missing")
   if params.get('music_on') is None: abort(400, "music_on missing")
   if params.get('has_sunglasses') is None: abort(400, "has_sunglasses missing")
+  if params.get('step') is None: abort(400, "step missing")
+  if params.get('happiness') is None: abort(400, "happiness missing")
   env = {
     'gender': params.get('gender', type=int),
     'age': params.get('gender', type=int),
     'music_on': params.get('gender', type=int),
     'has_sunglasses': params.get('has_sunglasses', type=int),
-    'step': params.get('step', type=int)
+    'step': params.get('step', type=int),
+    'happiness': params.get('happiness', type=float)
   }
-  action = 'MUSIC_A' # TODO: Get action
+  action = agent.next_action(env)
   choice_to_reward = (env, action)
   return jsonify({
     'action': action,
@@ -34,7 +38,7 @@ def observe():
   if params.get('happiness') is None: abort(400, "happiness missing")
   happiness = params.get('happiness', type=float)
   if choice_to_reward is not None:
-    # TODO: Reward
+    agent.reward(choice_to_reward[0], choice_to_reward[1], happiness)
     choice_to_reward = None
   return "OK"
 
