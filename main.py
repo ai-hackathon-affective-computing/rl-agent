@@ -13,16 +13,18 @@ def hello():
 
 @app.route('/next_action')
 def next_action():
-  if request.args.get('gender') is None: abort(400, "gender missing")
+  if request.args.get('female') is None: abort(400, "female missing")
   if request.args.get('age') is None: abort(400, "age missing")
-  if request.args.get('music_on') is None: abort(400, "music_on missing")
+  if request.args.get('music') is None: abort(400, "music missing")
+  if request.args.get('route') is None: abort(400, "route missing")
   if request.args.get('has_sunglasses') is None: abort(400, "has_sunglasses missing")
   if request.args.get('step') is None: abort(400, "step missing")
   if request.args.get('happiness') is None: abort(400, "happiness missing")
   env = {
-    'gender': request.args.get('gender', type=int),
-    'age': request.args.get('gender', type=int),
-    'music_on': request.args.get('gender', type=int),
+    'female': request.args.get('female', type=int),
+    'age': request.args.get('age', type=int),
+    'music': request.args.get('music', type=int),
+    'route': request.args.get('route', type=int),
     'has_sunglasses': request.args.get('has_sunglasses', type=int),
     'step': request.args.get('step', type=int),
     'happiness': request.args.get('happiness', type=float)
