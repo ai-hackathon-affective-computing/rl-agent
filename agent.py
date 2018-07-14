@@ -17,4 +17,5 @@ class Agent(object):
     return self.last_action
 
   def rewardLastAction(self, reward):
+    return 0
     # self.last_action
