@@ -3,7 +3,6 @@ from qpole import QCartPoleSolver
 class Agent(object):
 
   def __init__(self):
-
     self.agent = QCartPoleSolver()
     self.agent.load()
     self.last_action = None
