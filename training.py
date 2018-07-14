@@ -26,6 +26,13 @@ action_def = {
 n_steps = 5             # 0, 1 (15min), 2 (30min), 3 (45min), 4 (END)
 
 
+def get_normalized_features(features_dict):
+    output = []
+    for f_key in features_dict.keys():
+        output.append((features_dict[f_key] - feature_def[f_key]['min']) / (feature_def[f_key]['max'] - feature_def[f_key]['min']))
+    return np.array(output)
+
+
 def random_features_generator(force_dict, seed=None):
     force_dict = {} if force_dict is None else force_dict
     env = {}
@@ -66,20 +73,20 @@ def explore(agent, n_episodes):
 
         ### STEP ###
         for step in range(n_steps):
-            action = agent.act(features=features.values())
+            agent_features = get_normalized_features(features)
+            action = agent.act(features=agent_features)
             reward = simulate_reward(features,  action_def[action])
 
-            ### TODO fix update_features
-            next_features = update_features(features, action)
+            next_features = update_features(deepcopy(features), action)
 
-            agent.remember((features.values(), action, reward, next_features.values(), (step == n_steps-1)))
+            agent_features = get_normalized_features(features)
+            agent_features_next = get_normalized_features(next_features)
+            agent.remember((agent_features, action, reward, agent_features_next, (step == n_steps-1)))
 
             features = deepcopy(next_features)
 
-
-
-
-        agent.learn()
+        if repetition % 50 == 0 and repetition != 0:
+            agent.learn()
         print('Episode {}'. format(repetition))
 
 
@@ -87,7 +94,8 @@ def train(agent, n_episodes):
     reward_per_episodes = []
 
     for repetition in range(n_episodes):
-        agent.set_epsilon(1.0 - (repetition/n_episodes))
+        # agent.set_epsilon(1.0 - (repetition/n_episodes))
+        agent.set_epsilon(0.5)
 
         ### RESET ###
         music = 0
@@ -98,17 +106,19 @@ def train(agent, n_episodes):
 
         ### STEP ###
         for step in range(n_steps):
-            action = agent.act(features=features.values())
+            agent_features = get_normalized_features(features)
+            action = agent.act(features=agent_features)
             reward = simulate_reward(features,  action_def[action])
-            last_features = features
-            features = update_features(features, action)
+            last_features = deepcopy(features)
+            features = update_features(deepcopy(features), action)
 
-            agent.remember((last_features.values(), action, reward, features.values(), (step == n_steps-1)))
+            agent_features = get_normalized_features(features)
+            agent_features_last = get_normalized_features(last_features)
+            agent.remember((agent_features_last, action, reward, agent_features, (step == n_steps-1)))
             reward_per_steps.append(reward)
 
-
-
-        agent.learn()
+        if repetition % 10 == 0 and repetition != 0:
+            agent.learn()
         reward_per_episodes.append(reward_per_steps)
         print('Episode {} reached summed reward of {}'.format(repetition, sum(reward_per_steps)))
 
@@ -130,9 +140,10 @@ def evaluate(agent, n_episodes):
 
         ### STEP ###
         for step in range(n_steps):
-            action = agent.act(features=features.values())
+            agent_features = get_normalized_features(features)
+            action = agent.act(features=agent_features)
             reward = simulate_reward(features, action_def[action])
-            features = update_features(features, action)
+            features = update_features(deepcopy(features), action)
 
             reward_per_steps.append(reward)
 
@@ -149,11 +160,11 @@ if __name__ == '__main__':
     agent = JohannesAgent(n_features=len(feature_def), n_actions=len(action_def))
 
     # Set epsilon to 1
-    explore(agent, 1000)
+    explore(agent, 10000)
     agent.learn()
 
     # Set epsilon to 1.0 to 0.0
-    reward_per_episodes = train(agent, 1000)
+    reward_per_episodes = train(agent, 10000)
     agent.save()
 
     series = pd.Series([sum(e) for e in reward_per_episodes])
@@ -166,5 +177,3 @@ if __name__ == '__main__':
     series = pd.Series([sum(e) for e in reward_per_episodes])
     series.plot()
     plt.show()
-
-

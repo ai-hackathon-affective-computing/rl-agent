@@ -1,14 +1,20 @@
+from qpole import QCartPoleSolver
 
+class Agent(object):
 
-class Agent:
+  def __init__(self):
+
+    self.agent = QCartPoleSolver()
+    self.agent.load()
+    self.last_action = None
 
   def revive(self):
-    # TODO: Load agent
-    a = 1
+    self.agent.load()
 
   def next_action(self, env):
-    return 'MUSIC_A'
+    state = self.agent.discretize(env)
+    self.last_action = self.agent.choose_action(state, 0.0)
+    return self.last_action
 
   def rewardLastAction(self, reward):
-    # TODO: Reward agent
-    a = 1
+    # self.last_action
