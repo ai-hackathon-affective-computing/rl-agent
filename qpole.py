@@ -85,7 +85,7 @@ def random_features_generator(force_dict, seed=None):
 
 
 class QCartPoleSolver():
-    def __init__(self, buckets=(2, 2, 2, 3, 5, 3,), n_episodes=20000, n_win_ticks=195, min_alpha=0.1, min_epsilon=0.1, gamma=1.0, ada_divisor=25, max_env_steps=None, quiet=False, monitor=False):
+    def __init__(self, buckets=(2, 2, 2, 3, 5, 3,), n_episodes=50000, n_win_ticks=195, min_alpha=0.1, min_epsilon=0.1, gamma=1.0, ada_divisor=25, max_env_steps=None, quiet=False, monitor=False):
         self.buckets = buckets # down-scaling feature space to discrete range
         self.n_episodes = n_episodes # training episodes 
         #self.n_win_ticks = n_win_ticks # average ticks over 100 episodes required for win
@@ -182,4 +182,5 @@ if __name__ == "__main__":
     #print(series.describe())
     series.plot()
     plt.show()
+    print("Test")
     # gym.upload('tmp/cartpole-1', api_key='')
