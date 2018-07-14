@@ -33,8 +33,8 @@ def next_action():
     'env': env
   })
 
-@app.route('/observe')
-def observe():
+@app.route('/reward')
+def reward():
   if request.args.get('happiness') is None: abort(400, "happiness missing")
   happiness = request.args.get('happiness', type=float)
   agent.rewardLastAction(happiness)
