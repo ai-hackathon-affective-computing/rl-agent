@@ -5,11 +5,11 @@ class Agent(object):
   def __init__(self):
 
     self.agent = bmwAgent()
-    self.agent.load_q_table()
+    self.agent.load_q_table('q_savings/q_table-11.08.09.246167-.npy')
     self.last_action = None
 
   def revive(self):
-    self.agent.load_q_table()
+    self.agent.load_q_table('q_savings/q_table-11.08.09.246167-.npy')
 
   def next_action(self, env):
     state = self.agent.discretize(env)

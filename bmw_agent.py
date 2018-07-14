@@ -199,10 +199,10 @@ import matplotlib.pyplot as plt
 
 #
 if __name__ == "__main__":
-    solver = bmwAgent(max_q=False)
+    solver = bmwAgent(max_q=True)
 
     # Only needed if agent wants to be tested for max policy with saved q-table
-    #solver.load_q_table('q_savings/q_table-10.18.15.925081-.npy')
+    solver.load_q_table('q_savings/q_table-11.08.09.246167-.npy')
 
     solver.run()
     #Only needed if q-table output of learning run should be saved
