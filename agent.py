@@ -1,15 +1,15 @@
-from qpole import QCartPoleSolver
+from bmw_agent import bmwAgent
 
 class Agent(object):
 
   def __init__(self):
 
-    self.agent = QCartPoleSolver()
-    self.agent.load()
+    self.agent = bmwAgent()
+    self.agent.load_q_table()
     self.last_action = None
 
   def revive(self):
-    self.agent.load()
+    self.agent.load_q_table()
 
   def next_action(self, env):
     state = self.agent.discretize(env)

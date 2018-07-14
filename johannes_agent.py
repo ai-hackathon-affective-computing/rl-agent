@@ -31,7 +31,7 @@ class JohannesAgent(object):
             return np.argmax(act_values[0])
 
     def learn(self):
-        if self.counter % 10 == 0:
+        if self.counter % 100 == 0:
             self.target_model.set_weights(self.value_model.get_weights())
             batch = self.create_batch()
             if batch is None:
@@ -45,23 +45,23 @@ class JohannesAgent(object):
                     t = self.target_model.predict(self.reshape_state(next_state))[0]
                     target[0][action] = reward + self.hyperparameters["GAMMA"] * t[np.argmax(a)]
                 self.value_model.fit(self.reshape_state(state), target, epochs=1, verbose=0)
+                if self.epsilon > self.hyperparameters["EPSILON_MIN"]:
+                    self.epsilon = max(self.hyperparameters["EPSILON_MIN"], self.epsilon * self.hyperparameters["EPSILON_DECAY"])
                 self.counter += 1
 
 
 
     def build_network(self, n_features, n_actions):
         model = Sequential([
-            Dense(n_features, input_dim=n_features),
+            Dense(16, input_dim=n_features),
             Activation("relu"),
-            Dropout(0.25),
-            Dense(n_features),
-            Activation("relu"),
-            Dense(n_features),
+           # Dropout(0.25),
+            Dense(32),
             Activation("relu"),
             Dense(n_actions),
-            Activation("sigmoid")
+            Activation("linear")
         ])
-        model.compile(loss='binary_crossentropy', optimizer=optimizers.Adam())
+        model.compile(loss='mean_squared_error', optimizer=optimizers.Adam(lr=self.hyperparameters["LEARNING_RATE"]))
         return model
 
 
@@ -70,6 +70,19 @@ class JohannesAgent(object):
             experiences = rsample(self.experience_buffer, self.hyperparameters["BATCH_SIZE"])
             return experiences
         return None
+
+
+    # def fill_experience_buffer(self):
+    #     for i in range(self.hyperparameters["EXP_BUFFER_SIZE"]):
+    #         state = self.simulation.reset()
+    #         while True:
+    #             action = self.act(state)
+    #             next_state, reward, done, _ = self.simulation.step(action)
+    #             self.remember(state, action, reward, next_state, done)
+    #             state = deepcopy(next_state)
+    #             if done:
+    #                 break
+
 
     def remember(self, tuple):
         if len(self.experience_buffer) >= self.hyperparameters["EXP_BUFFER_SIZE"]:
@@ -80,7 +93,7 @@ class JohannesAgent(object):
         return load_model(file)
 
     def save(self):
-        self.target_model.save('net_savings/net-' + str(datetime.datetime.now().time()).replace(':','.') + '-.h5')
+        self.target_model.save('q_savings/net-' + str(datetime.datetime.now().time()).replace(':','.') + '-.h5')
 
 
     def reshape_state(self, features):

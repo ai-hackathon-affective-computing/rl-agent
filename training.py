@@ -26,11 +26,25 @@ action_def = {
 n_steps = 5             # 0, 1 (15min), 2 (30min), 3 (45min), 4 (END)
 
 
-def get_normalized_features(features_dict):
-    output = []
-    for f_key in features_dict.keys():
-        output.append((features_dict[f_key] - feature_def[f_key]['min']) / (feature_def[f_key]['max'] - feature_def[f_key]['min']))
-    return np.array(output)
+def compute_reward(feature, actionid):
+    action = action_def[actionid]
+    profiles = [
+        {0: 'music_A', 1: 'route_A', 2: 'route_B', 3: 'route_A', 4: 'no_music'},
+        {0: 'music_B', 1: 'route_A', 2: 'route_B', 3: 'route_A', 4: 'no_music'},
+        {0: 'route_A', 1: 'route_B', 2: 'route_A', 3: 'route_B', 4: 'no_music'},
+        {0: 'music_A', 1: 'route_B', 2: 'route_A', 3: 'route_B', 4: 'no_music'},
+    ]
+
+    if feature['female'] == 1:
+        if feature['age'] < 50:
+            return int(action == profiles[0][feature['step']])
+        else:
+            return int(action == profiles[1][feature['step']])
+    else:
+        if feature['age'] < 50:
+            return int(action == profiles[2][feature['step']])
+        else:
+            return int(action == profiles[3][feature['step']])
 
 
 def random_features_generator(force_dict, seed=None):
@@ -60,10 +74,12 @@ def update_features(features1, action):
     return features
 
 
-def explore(agent, n_episodes):
-    agent.set_epsilon(1.0)
+def explore(agent):
+    #agent.set_epsilon(1.0)
 
-    for repetition in range(n_episodes):
+    #for repetition in range(n_episodes):
+
+    for i in range(0, int((agent.hyperparameters['EXP_BUFFER_SIZE']) / n_steps)):
 
         ### RESET ###
         music = 0
@@ -73,29 +89,24 @@ def explore(agent, n_episodes):
 
         ### STEP ###
         for step in range(n_steps):
-            agent_features = get_normalized_features(features)
-            action = agent.act(features=agent_features)
-            reward = simulate_reward(features,  action_def[action])
+            action = agent.act(features=features.values())
+            #reward = simulate_reward(features,  action_def[action])
+            reward = compute_reward(features, action)
 
-            next_features = update_features(deepcopy(features), action)
+            ### TODO fix update_features
+            next_features = update_features(features, action)
 
-            agent_features = get_normalized_features(features)
-            agent_features_next = get_normalized_features(next_features)
-            agent.remember((agent_features, action, reward, agent_features_next, (step == n_steps-1)))
+            agent.remember((features.values(), action, reward, next_features.values(), (step == n_steps-1)))
 
             features = deepcopy(next_features)
 
-        if repetition % 50 == 0 and repetition != 0:
-            agent.learn()
-        print('Episode {}'. format(repetition))
+        #print('Episode {}'. format(repetition))
 
 
 def train(agent, n_episodes):
     reward_per_episodes = []
 
     for repetition in range(n_episodes):
-        # agent.set_epsilon(1.0 - (repetition/n_episodes))
-        agent.set_epsilon(0.5)
 
         ### RESET ###
         music = 0
@@ -106,19 +117,17 @@ def train(agent, n_episodes):
 
         ### STEP ###
         for step in range(n_steps):
-            agent_features = get_normalized_features(features)
-            action = agent.act(features=agent_features)
-            reward = simulate_reward(features,  action_def[action])
-            last_features = deepcopy(features)
-            features = update_features(deepcopy(features), action)
+            action = agent.act(features=features.values())
+            #reward = simulate_reward(features,  action_def[action])
+            reward = compute_reward(features, action)
+            next_features = update_features(features, action)
 
-            agent_features = get_normalized_features(features)
-            agent_features_last = get_normalized_features(last_features)
-            agent.remember((agent_features_last, action, reward, agent_features, (step == n_steps-1)))
+            agent.remember((features.values(), action, reward, next_features.values(), (step == n_steps - 1)))
+
+            features = deepcopy(next_features)
             reward_per_steps.append(reward)
 
-        if repetition % 10 == 0 and repetition != 0:
-            agent.learn()
+        agent.learn()
         reward_per_episodes.append(reward_per_steps)
         print('Episode {} reached summed reward of {}'.format(repetition, sum(reward_per_steps)))
 
@@ -140,10 +149,12 @@ def evaluate(agent, n_episodes):
 
         ### STEP ###
         for step in range(n_steps):
-            agent_features = get_normalized_features(features)
-            action = agent.act(features=agent_features)
-            reward = simulate_reward(features, action_def[action])
-            features = update_features(deepcopy(features), action)
+            action = agent.act(features=features.values())
+            #reward = simulate_reward(features, action_def[action])
+            reward = compute_reward(features, action)
+            next_features = update_features(deepcopy(features), action)
+
+            features = deepcopy(next_features)
 
             reward_per_steps.append(reward)
 
@@ -160,11 +171,10 @@ if __name__ == '__main__':
     agent = JohannesAgent(n_features=len(feature_def), n_actions=len(action_def))
 
     # Set epsilon to 1
-    explore(agent, 10000)
-    agent.learn()
+    explore(agent)
 
     # Set epsilon to 1.0 to 0.0
-    reward_per_episodes = train(agent, 10000)
+    reward_per_episodes = train(agent, agent.hyperparameters['EPISODES'])
     agent.save()
 
     series = pd.Series([sum(e) for e in reward_per_episodes])
@@ -177,3 +187,5 @@ if __name__ == '__main__':
     series = pd.Series([sum(e) for e in reward_per_episodes])
     series.plot()
     plt.show()
+
+

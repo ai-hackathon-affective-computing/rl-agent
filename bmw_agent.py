@@ -3,6 +3,8 @@ import random
 import math
 from collections import deque
 from copy import deepcopy
+import yaml
+import datetime
 
 class Environment():
     def __init__(self):
@@ -84,22 +86,21 @@ def random_features_generator(force_dict, seed=None):
     return env
 
 
-class QCartPoleSolver():
-    def __init__(self, buckets=(2, 2, 2, 3, 5, 3,), n_episodes=50000, n_win_ticks=195, min_alpha=0.1, min_epsilon=0.1, gamma=1.0, ada_divisor=25, max_env_steps=None, quiet=False, monitor=False):
+class bmwAgent():
+    def __init__(self, buckets=(2, 2, 2, 3, 6, 3,), ada_divisor=25, quiet=False, max_q = False):
+        self.hyperparameters = self.read_in_configuration_file()[0]["hyperparameters"]
         self.buckets = buckets # down-scaling feature space to discrete range
-        self.n_episodes = n_episodes # training episodes 
-        #self.n_win_ticks = n_win_ticks # average ticks over 100 episodes required for win
-        self.min_alpha = min_alpha # learning rate
-        self.min_epsilon = min_epsilon # exploration rate
-        self.gamma = gamma # discount factor
+        self.n_episodes = self.hyperparameters["EPISODES"] # training episodes
+        if max_q:
+            self.n_episodes = 1
+        self.min_alpha = self.hyperparameters["LEARNING_RATE"] # learning rate
+        self.min_epsilon = self.hyperparameters["EPSILON_MIN"] # exploration rate
+        self.gamma = self.hyperparameters["GAMMA"] # discount factor
         self.ada_divisor = ada_divisor # only for development purposes
         self.quiet = quiet
-
-        #self.env = gym.make('CartPole-v0')
+        self.epsilon = self.hyperparameters["EPSILON"]
+        self.max_q = max_q
         self.state = State()
-        #if max_env_steps is not None: self.env._max_episode_steps = max_env_steps
-        #if monitor: self.env = gym.wrappers.Monitor(self.env, 'tmp/cartpole-1', force=True) # record results for upload
-
         self.Q = np.zeros(self.buckets + ( len(action_def),))
         print(self.Q.shape)
 
@@ -119,18 +120,31 @@ class QCartPoleSolver():
 
         return nobs
 
+    def save_q_table(self, q_table):
+        np.save('q_savings/q_table-' + str(datetime.datetime.now().time()).replace(':','.') + '-.npy', q_table)
+
+    def load_q_table(self, file):
+        self.Q = np.load(file)
+
+    def read_in_configuration_file(self):
+        return yaml.load(open('parameters.yml'))
+
     def choose_action(self, state, epsilon):
         return random.randint(0, len(action_def)-1) if (np.random.random() <= epsilon) else np.argmax(self.Q[state])
 
+    def choose_max_actions(self, state):
+        return np.argmax(self.Q[state])
+
     def update_q(self, state_old, action, reward, state_new, alpha):
         sc = alpha * (reward + self.gamma * np.max(self.Q[state_new]) - self.Q[state_old][action])
-        self.Q[state_old][(action)] += sc
+        self.Q[state_old][action] += sc
 
     def get_epsilon(self, t):
         return max(self.min_epsilon, min(1, 1.0 - math.log10((t + 1) / self.ada_divisor)))
 
     def get_alpha(self, t):
         return max(self.min_alpha, min(1.0, 1.0 - math.log10((t + 1) / self.ada_divisor)))
+
 
     def run(self):
         scores = deque(maxlen=100)
@@ -140,21 +154,25 @@ class QCartPoleSolver():
 
             alpha = self.get_alpha(e)
             epsilon = self.get_epsilon(e)
-            done = False
             i = 0
             
-            while not done:
-                # self.env.render()
-                action = self.choose_action(current_state, epsilon)
+            while True:
+                if self.max_q:
+                    action = self.choose_max_actions(current_state)
+                else:
+                    action = self.choose_action(current_state, epsilon)
+
                 reward = self.state.compute_reward(action)
-                done = self.state.state["step"] == 3
+                done = self.state.state["step"] == 4
                 obs = self.state.update_state_with_action(action)
-                
-                #obs, reward, done, _ = self.env.step(action)
+
                 new_state = self.discretize(obs)
                 self.update_q(current_state, action, reward, new_state, alpha)
                 current_state = new_state
                 i += reward
+
+                if done:
+                    break
 
             scores.append(i)
             mean_score = np.mean(scores)
@@ -167,7 +185,6 @@ class QCartPoleSolver():
 
             print(mean_score)
 
-        if not self.quiet: print('Did not solve after {} episodes 😞'.format(e))
         return e
 
 
@@ -175,12 +192,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
-    solver = QCartPoleSolver()
+    solver = bmwAgent(max_q=True)
+    solver.load_q_table('q_savings/q_table-10.18.15.925081-.npy')
+
     solver.run()
+    #solver.save_q_table(solver.Q)
 
     series = pd.Series(solver.mean_scores)
     #print(series.describe())
     series.plot()
     plt.show()
-    print("Test")
-    # gym.upload('tmp/cartpole-1', api_key='')
