@@ -9,5 +9,5 @@ RUN pip3 install tensorforce
 # Copy our code to app
 COPY ./ /app
 
-# TODO: Train network
+# Train network
 # RUN python3 app/training.py
