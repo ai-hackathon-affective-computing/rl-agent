@@ -29,7 +29,7 @@ def next_action():
     'step': request.args.get('step', type=int),
     'happiness': request.args.get('happiness', type=float)
   }
-  action = agent.next_action(env)
+  action = agent.next_action(env) if (env.step <= 4) else 9
   return jsonify({
     'action': action,
     'env': env
