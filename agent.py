@@ -4,6 +4,7 @@ class Agent(object):
 
   def __init__(self):
 
+
     self.agent = bmwAgent()
     self.agent.load_q_table('q_savings/q_table-11.08.09.246167-.npy')
     self.last_action = None
