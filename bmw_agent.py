@@ -10,9 +10,10 @@ class Environment():
     def __init__(self):
         pass
 
+# Class which represents a state at each abstract tick the environment has
+# State is represented as feature vector
 class State():
     def __init__(self):
-        # This can be exchanged with time later
         self.init_state()
 
     def init_state(self):
@@ -46,14 +47,14 @@ class State():
 
         if self.state['female'] == 1:
             if self.state['age'] < 50:
-                return int(action==profiles[0][self.state['step']])
+                return int(action == profiles[0][self.state['step']])
             else:
-                return int(action==profiles[1][self.state['step']])
+                return int(action == profiles[1][self.state['step']])
         else:
             if self.state['age'] < 50:
-                return int(action==profiles[2][self.state['step']])
+                return int(action == profiles[2][self.state['step']])
             else:
-                return int(action==profiles[3][self.state['step']])
+                return int(action == profiles[3][self.state['step']])
 
 action_def = {
     0: 'no_music',
@@ -71,6 +72,7 @@ feature_def = {
         'step': {'min': 0, 'max': 4},
         'route': {'min': 0, 'max': 2}
         }
+
 def random_features_generator(force_dict, seed=None):
     force_dict = {} if force_dict is None else force_dict
     env = {}
@@ -86,6 +88,7 @@ def random_features_generator(force_dict, seed=None):
     return env
 
 
+# Class for the Reinforcement Learning Agent using TD-Updates and Q-Learning
 class bmwAgent():
     def __init__(self, buckets=(2, 2, 2, 3, 6, 3,), ada_divisor=25, quiet=False, max_q = False):
         self.hyperparameters = self.read_in_configuration_file()[0]["hyperparameters"]
@@ -104,12 +107,8 @@ class bmwAgent():
         self.Q = np.zeros(self.buckets + ( len(action_def),))
         print(self.Q.shape)
 
+    # method to discretize states for building up correct q-table
     def discretize(self, obs):
-        # upper_bounds = [self.env.observation_space.high[0], 0.5, self.env.observation_space.high[2], math.radians(50)]
-        # lower_bounds = [self.env.observation_space.low[0], -0.5, self.env.observation_space.low[2], -math.radians(50)]
-        # ratios = [(obs[i] + abs(lower_bounds[i])) / (upper_bounds[i] - lower_bounds[i]) for i in range(len(obs))]
-        # new_obs = [int(round((self.buckets[i] - 1) * ratios[i])) for i in range(len(obs))]
-        # new_obs = [min(self.buckets[i] - 1, max(0, new_obs[i])) for i in range(len(obs))]
         nobs = (obs['female'], #2
         int(obs['age']<50), #2
         obs['has_sunglasses'], #2
@@ -120,21 +119,27 @@ class bmwAgent():
 
         return nobs
 
+    # method to save q-table
     def save_q_table(self, q_table):
         np.save('q_savings/q_table-' + str(datetime.datetime.now().time()).replace(':','.') + '-.npy', q_table)
 
+    # method to load q-table
     def load_q_table(self, file):
         self.Q = np.load(file)
 
+    # helper method to read in configuration file
     def read_in_configuration_file(self):
         return yaml.load(open('parameters.yml'))
 
+    # chooses action regarding exploration - exploitation
     def choose_action(self, state, epsilon):
         return random.randint(0, len(action_def)-1) if (np.random.random() <= epsilon) else np.argmax(self.Q[state])
 
+    # chooses best policies for testing agent
     def choose_max_actions(self, state):
         return np.argmax(self.Q[state])
 
+    # method to do temporal difference updates
     def update_q(self, state_old, action, reward, state_new, alpha):
         sc = alpha * (reward + self.gamma * np.max(self.Q[state_new]) - self.Q[state_old][action])
         self.Q[state_old][action] += sc
@@ -146,6 +151,8 @@ class bmwAgent():
         return max(self.min_alpha, min(1.0, 1.0 - math.log10((t + 1) / self.ada_divisor)))
 
 
+    # Main learning/Testing loop for agent
+    # Used Temporal Difference updates with one-step look-ahead and Q-Learning
     def run(self):
         scores = deque(maxlen=100)
         self.mean_scores = []
@@ -178,9 +185,6 @@ class bmwAgent():
             scores.append(i)
             mean_score = np.mean(scores)
             self.mean_scores.append(mean_score)
-            # if mean_score >= self.n_win_ticks and e >= 100:
-            #     if not self.quiet: print('Ran {} episodes. Solved after {} trials ✔'.format(e, e - 100))
-            #     return e - 100
             if e % 100 == 0 and not self.quiet:
                 print('[Episode {}] - Mean survival time over last 100 episodes was {} ticks.'.format(e, mean_score))
 
@@ -192,11 +196,16 @@ class bmwAgent():
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
+#
 if __name__ == "__main__":
-    solver = bmwAgent(max_q=True)
-    solver.load_q_table('q_savings/q_table-10.18.15.925081-.npy')
+    solver = bmwAgent(max_q=False)
+
+    # Only needed if agent wants to be tested for max policy with saved q-table
+    #solver.load_q_table('q_savings/q_table-10.18.15.925081-.npy')
 
     solver.run()
+    #Only needed if q-table output of learning run should be saved
     #solver.save_q_table(solver.Q)
 
     series = pd.Series(solver.mean_scores)

@@ -1,13 +1,13 @@
 from keras.models import *
-from keras.layers.core import Dense, Activation, Dropout
+from keras.layers.core import Dense, Activation
 from random import sample as rsample
 import numpy as np
 import random as rn
-from copy import deepcopy
 import datetime
 
 
-class JohannesAgent(object):
+# Class to represent a DQN Agent according the DeepLearning Paper (not correctly working)
+class DQNAgent(object):
     def __init__(self, n_features=10, n_actions=4, load_network=False, file=None):
         self.experience_buffer = []
         self.n_actions = n_actions
@@ -108,4 +108,4 @@ class JohannesAgent(object):
 
 
 if __name__ == "__main__":
-    agent = JohannesAgent()
+    agent = DQNAgent()

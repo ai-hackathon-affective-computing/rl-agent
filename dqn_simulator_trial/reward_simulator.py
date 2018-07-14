@@ -1,6 +1,6 @@
 from __future__ import print_function
-from reward_simulator.persona import Persona
-import reward_simulator.traits as traits
+from dqn_simulator_trial.persona import Persona
+import dqn_simulator_trial.traits as traits
 
 
 personas = [

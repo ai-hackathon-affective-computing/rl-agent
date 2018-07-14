@@ -1,5 +1,5 @@
 from __future__ import print_function
-from reward_simulator import simulate_reward
+from dqn_simulator_trial import simulate_reward
 
 simulate_reward({
   'female': 1,

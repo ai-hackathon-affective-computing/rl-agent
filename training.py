@@ -1,5 +1,5 @@
-from johannes_agent import JohannesAgent
-from reward_simulator.reward_simulator import simulate_reward
+from DQNAgent_trial import JohannesAgent
+from dqn_simulator_trial.reward_simulator import simulate_reward
 from copy import deepcopy
 import random
 import numpy as np
