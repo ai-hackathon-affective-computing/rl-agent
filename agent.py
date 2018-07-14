@@ -18,3 +18,4 @@ class Agent(object):
 
   def rewardLastAction(self, reward):
     # self.last_action
+    pass
