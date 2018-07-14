@@ -167,7 +167,8 @@ class bmwAgent():
                 obs = self.state.update_state_with_action(action)
 
                 new_state = self.discretize(obs)
-                self.update_q(current_state, action, reward, new_state, alpha)
+                if not self.max_q:
+                    self.update_q(current_state, action, reward, new_state, alpha)
                 current_state = new_state
                 i += reward
 
